@@ -18,14 +18,20 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path(example.file),
         });
 
-        // `install_firmware()` is the MicroZig pendant to `Build.installArtifact()`
-        // and allows installing the firmware as a typical firmware file.
-        //
-        // This will also install into `$prefix/firmware` instead of `$prefix/bin`.
+        // Install the firmware
         mz.install_firmware(b, firmware, .{});
 
-        // For debugging, we also always install the firmware as an ELF file
-        //mz.install_firmware(b, firmware, .{ .format = .elf });
+        // Add a custom build step to run the Python script after the firmware is installed
+        const reboot_cmd = b.addSystemCommand(&[_][]const u8{
+            "python3",
+            "src/reboot.py",
+        });
+
+        // Make the reboot command depend on the firmware's install step
+        //reboot_cmd.step.dependOn(b.getInstallStep());
+
+        // Ensure the default build step includes the reboot command
+        b.default_step.dependOn(&reboot_cmd.step);
     }
 }
 
