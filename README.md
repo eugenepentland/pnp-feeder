@@ -1,6 +1,6 @@
 # Pick and Place Feeder Project
 
-![Prototype Feeder Advancing](images/feed.gif)
+![Prototype Feeder Advancing](docs/images/feed.gif)
 
 ## Overview
 The aim of this project is to design a powered and addressable pick and place feeder for less than $25 fully assembled and tested. Other pnp feeders exist but didn't meet my design requirements or were too expensive to justify having 200+ feeders.
@@ -30,12 +30,12 @@ This project aims to solve these challenges by providing an easy-to-use, modular
 ## Block Diagrams
 
 ### System Block Diagram
-![System Block Diagram](images/system_block_diagram.png)
+![System Block Diagram](docs/images/system_block_diagram.png)
 
 The system block diagram illustrates the two main boards involved in the design: the feeder and the backplane. The backplane contains a master controller that distributes power and uses a CAN physical interface for UART communication, sending Modbus data packets to each of the feeders. The backplane supports 8 addressing bits per feeder, allowing up to 256 feeders to be connected to a single master controller. This scalability makes the system suitable for use as an inventory system. Power can be supplied at either 24V or 12V.
 
 ### Feeder Block Diagram
-![Feeder Block Diagram](images/feeder_block_diagram.png)
+![Feeder Block Diagram](docs/images/feeder_block_diagram.png)
 
 The feeder block diagram shows that each feeder is equipped with an RP2040 microcontroller, which controls an SG90 servo motor responsible for advancing the tape forwards. The RP2040's flash memory is used to store key information for each feeder, including the MPN (Manufacturer Part Number), quantity, and footprint of the components being fed.
 
