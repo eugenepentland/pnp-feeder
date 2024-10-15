@@ -1,0 +1,19 @@
+.{
+    .name = "tools/regz",
+    .version = "0.0.0",
+    .paths = .{
+        "LICENSE",
+        "README.md",
+        "build.zig",
+        "build.zig.zon",
+        "characterized",
+        "src",
+        "tests",
+    },
+    .dependencies = .{
+        .libxml2 = .{
+            .url = "https://github.com/mattnite/zig-build-libxml2/archive/fab68b5fb06704ef4bdaa221726493a4b6af04b5.tar.gz",
+            .hash = "122084531ab8ba877a0178fb177a61f6dc9bed56bdcdfb11ad362f352680c04d84cb",
+        },
+    },
+}
