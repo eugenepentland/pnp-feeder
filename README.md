@@ -3,22 +3,22 @@
 ![Prototype Feeder Advancing](docs/images/feed.gif)
 
 ## Overview
-The aim of this project is to design a powered and addressable pick and place feeder for less than $25 fully assembled and tested. Other pnp feeders exist but didn't meet my design requirements or were too expensive to justify having 200+ feeders.
+The aim of this project is to design a powered and addressable pick and place feeder for less than $25 fully assembled and tested. Other pnp feeders exist but didn't meet my design requirements or were too expensive to justify having 100+ feeders.
 
 This project aims to solve these challenges by providing an easy-to-use, modular, and affordable feeder system that can be used with both the Neoden 4 and Lumen PnP machines.
 
 ## Design Goals
 
 1. **Compatibility**
-   - Design a powered, addressable pick and place feeder compatible with Neoden 4 and Lumen PnP machines.
+   - Design a powered, pick and place feeder compatible with Neoden 4 and OpenPNP machines.
    - Support component sizes down to 0402.
 
 2. **Low Cost**
-   - Keep the BOM cost per feeder unit under $10 to make the solution accessible and affordable for hobbyists and mid scale manufacturing.
+   - Keep the BOM cost per feeder unit under $10 to make the solution accessible and affordable for hobbyists and small manufacturers.
 
 3. **Fast Production**
    - Limit 3D printing time per unit to less than 2 hours using a standard consumer-grade 3D printer.
-   - Assembly time less than 10 minutes per feeder.
+   - Assembly time less than 10 minutes per feeder
 
 4. **Ease of Use**
    - Ensure quick part loading to minimize the setup time.
@@ -32,7 +32,7 @@ This project aims to solve these challenges by providing an easy-to-use, modular
 ### System Block Diagram
 ![System Block Diagram](docs/images/system_block_diagram.png)
 
-The system block diagram illustrates the two main boards involved in the design: the feeder and the backplane. The backplane contains a master controller that distributes power and uses a CAN physical interface for UART communication, sending Modbus data packets to each of the feeders. The backplane supports 8 addressing bits per feeder, allowing up to 256 feeders to be connected to a single master controller. This scalability makes the system suitable for use as an inventory system. Power can be supplied at either 24V or 12V.
+The system block diagram illustrates the three main boards involved in the design: the feeder, backplane controller and backplane distribution board. The backplane contains a master controller that distributes power and uses a CAN physical interface for UART communication, sending Modbus data packets to the distrubiton boards which go to each of the feeders. The backplane supports 8 addressing bits per feeder, allowing up to 256 feeders to be connected to a single master controller. This scalability makes the system suitable for use as an inventory system. Power can be supplied at either 24V or 12V.
 
 ### Feeder Block Diagram
 ![Feeder Block Diagram](docs/images/feeder_block_diagram.png)
@@ -43,7 +43,7 @@ The feeder block diagram shows that each feeder is equipped with an RP2040 micro
 
 1. [X] System Level Block Diagram
 2. [X] Feeder Block Diagram
-3. [ ] Backplane Block Diagram
+3. [X] Backplane Block Diagram
 4. [X] MVP Feeder Hardware Prototype
 5. [ ] Feeder Positioning Accuracy Testing
 6. [X] Feeder Lifespan Testing
