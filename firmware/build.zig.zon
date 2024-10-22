@@ -33,6 +33,10 @@
             .url = "https://github.com/ZigEmbeddedGroup/serial/archive/13cc57bd170decc987660aa35a177c668c3e9cc5.tar.gz",
             .hash = "122054cbec27a1894b4e8568cd743d93e92de0be7a9775b90dd60932bdaddd861a5e",
         },
+        .microzig = .{
+            .url = "https://codeload.github.com/eugenepentland/microzig/tar.gz/3a663a7c5d9c502e2854112237b42ff1bb54ea0b",
+            .hash = "122030cfe1ea47862e8c62412f9cc6feb2fd22d0cfaefb09871b56390e46f9bd3e61",
+        },
     },
 
     // Specifies the set of files and directories that are included in this package.
