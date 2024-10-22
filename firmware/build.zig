@@ -1,6 +1,6 @@
 const std = @import("std");
 const MicroZig = @import("microzig/build");
-const rp2040 = @import("microzig/bsp/raspberrypi/rp2040");
+const rp2040 = @import("microzig/port/raspberrypi/rp2xxx");
 
 const available_examples = [_]Example{
     .{ .target = rp2040.boards.raspberrypi.pico, .name = "main", .file = "src/main.zig" },
@@ -35,13 +35,27 @@ pub fn build(b: *std.Build) void {
         // Run the run app
         const run_cmd = b.addRunArtifact(exe);
 
-        const snek = b.dependency("serial", .{});
-        exe.root_module.addImport("serial", snek.module("serial"));
+        const serial = b.dependency("serial", .{});
+        exe.root_module.addImport("serial", serial.module("serial"));
 
         run_cmd.step.dependOn(b.getInstallStep());
 
         const run_step = b.step("flash", "Flash the firmware");
         run_step.dependOn(&run_cmd.step);
+
+        const exe2 = b.addExecutable(.{
+            .name = "debug",
+            .root_source_file = b.path("src/tools/serial_debug.zig"),
+            .target = target,
+            .optimize = optimize,
+        });
+        b.installArtifact(exe);
+        const run_cmd2 = b.addRunArtifact(exe2);
+        const run_step2 = b.step("debug", "Flash the firmware");
+        run_step2.dependOn(&run_cmd2.step);
+
+        exe2.root_module.addImport("serial", serial.module("serial"));
+        run_cmd.step.dependOn(b.getInstallStep());
     }
 }
 

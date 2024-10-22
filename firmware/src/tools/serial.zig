@@ -26,15 +26,15 @@ pub fn main() !void {
         .handshake = .none,
     });
     const address = 0;
-    const function_id = 125;
-    //const data = 101;
-    var cmd = [_]u8{ address, function_id, 0, 0 };
+    const function_id = 103;
+    const data = 105;
+    var cmd = [_]u8{ address, function_id, data, 222, 155 };
     const slice = cmd[0..];
 
-    try modbus.update_crc_in_place(slice);
+    //try modbus.update_crc_in_place(slice);
     std.log.info("Running command, {any}", .{slice});
 
-    _ = try serial.writer().write(slice);
+    _ = try serial.writer().writeAll(slice);
 
     //var buff: [4]u8 = undefined;
     //const slic2e = buff[0..];
