@@ -21,17 +21,27 @@ pub fn build(b: *std.Build) void {
         // Install the firmware
         mz.install_firmware(b, firmware, .{});
 
-        // Add a custom build step to run the Python script after the firmware is installed
-        const reboot_cmd = b.addSystemCommand(&[_][]const u8{
-            "python",
-            "src/reboot.py",
+        // Create the run application
+        const target = b.standardTargetOptions(.{});
+
+        const exe = b.addExecutable(.{
+            .name = "RunBootloader",
+            .root_source_file = b.path("src/tools/serial.zig"),
+            .target = target,
+            .optimize = optimize,
         });
+        b.installArtifact(exe);
 
-        // Make the reboot command depend on the firmware's install step
-        //reboot_cmd.step.dependOn(b.getInstallStep());
+        // Run the run app
+        const run_cmd = b.addRunArtifact(exe);
 
-        // Ensure the default build step includes the reboot command
-        b.default_step.dependOn(&reboot_cmd.step);
+        const snek = b.dependency("serial", .{});
+        exe.root_module.addImport("serial", snek.module("serial"));
+
+        run_cmd.step.dependOn(b.getInstallStep());
+
+        const run_step = b.step("flash", "Flash the firmware");
+        run_step.dependOn(&run_cmd.step);
     }
 }
 

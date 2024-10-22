@@ -2,15 +2,6 @@ import serial
 import time
 
 def generate_crc16_append(data: list) -> list:
-    """
-    Compute the Modbus CRC16 checksum for the given data and append the CRC to the data list.
-    
-    Args:
-        data (list): The input data as a list of integers (each 0-255).
-    
-    Returns:
-        list: The data list with the CRC16 appended as two separate bytes (low byte first).
-    """
     crc = 0xFFFF  # Initialize CRC to 0xFFFF
     
     for byte in data:
@@ -50,33 +41,18 @@ ser = serial.Serial(
 if not ser.is_open:
     ser.open()
 
-def set_servo_angle(angle, delay_ms):
+def echo_response(content):
     address = 0
-    function_id = 102
-    data = [address, function_id, angle, 0, 0]  # Example data
+    function_id = 103
+    data = [address, function_id] + list(content)  # Example data
     return bytearray(generate_crc16_append(data))
 
 
 import time
 
 while True:
-    for i in [90, 60, 30, 20]:
-        i = int(input("Set Servo Angle: "))
-        data_bytes = set_servo_angle(i, 0)
-
-        # Start timing using a high-precision timer
-        start_time = time.perf_counter()
-        
-        ser.write(data_bytes)
-
-        # Await a response
-        bytes = ser.read(2)
-        
-        # Calculate the time difference using a high-precision timer
-        execution_time = time.perf_counter() - start_time
-        print(f"Execution time: {execution_time:.10f} seconds. {bytes}")
-        
-        time.sleep(1)
-
+    bytes = ser.read(4)
+    print(bytes)
+    
 
 ser.close()

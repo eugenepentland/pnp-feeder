@@ -78,7 +78,7 @@ def execute_picotool_commands():
 def main():
     # Set up the Modbus RTU client
     client = ModbusSerialClient(
-        port='COM4',  # Replace with your serial port
+        port='COM9',  # Replace with your serial port
         baudrate=115200,
         parity='N',  # None parity
         stopbits=1,
@@ -115,9 +115,9 @@ def main():
             # Close the Modbus connection
             client.close()
 
-    time.sleep(1)
+    #time.sleep(1)
     # Execute the picotool commands after successful Modbus communication
-    execute_picotool_commands()
+    #execute_picotool_commands()
 
 if __name__ == "__main__":
     main()

@@ -156,13 +156,16 @@ pub const CdcClassDriver = struct {
         var buf: [64]u8 = undefined;
         const size = @min(data.len, max_size);
         @memcpy(buf[0..size], data[0..size]);
-        buf[max_size - 2] = '\r';
-        buf[max_size - 1] = '\n';
+
+        // We no longer append \r or \n here.
         const data_packet = buf[0..size];
 
+        // Check if the device is ready to transfer
         if (self.device.?.ready() == false) {
             return;
         }
+
+        // Transfer the data to the device endpoint
         self.device.?.endpoint_transfer(self.ep_in, data_packet);
     }
 

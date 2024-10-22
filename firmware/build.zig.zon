@@ -29,6 +29,10 @@
         .@"microzig/bsp/raspberrypi/rp2040" = .{
             .path = "library/microzig/bsp/raspberrypi/rp2040",
         },
+        .serial = .{
+            .url = "https://github.com/ZigEmbeddedGroup/serial/archive/13cc57bd170decc987660aa35a177c668c3e9cc5.tar.gz",
+            .hash = "122054cbec27a1894b4e8568cd743d93e92de0be7a9775b90dd60932bdaddd861a5e",
+        },
     },
 
     // Specifies the set of files and directories that are included in this package.

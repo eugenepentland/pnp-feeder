@@ -87,12 +87,12 @@ def capture_image(angle):
         print("Failed to capture image")
 
 while True:
-    for i in [150, 90, 20]:
+    for i in [150, 115, 85, 80]:
         data_bytes = set_servo_angle(i, 0)
         ser.write(data_bytes)
         time.sleep(0.5)
 
-        if i != 140:
+        if i == 115 or i == 85:
             capture_image(i)
 
 ser.close()

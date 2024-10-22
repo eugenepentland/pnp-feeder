@@ -7,40 +7,76 @@ const time = rp2040.time;
 const gpio = rp2040.gpio;
 const Pwm = microzig.hal.pwm.Pwm;
 
+pub const servo_angle_args = packed struct {
+    const id: u8 = 102;
+    angle: u8,
+    delay_ms: u16,
+
+    pub fn decode(args: []const u8) !servo_angle_args {
+        if (args.len < 3) {
+            return error.InvalidArgs;
+        }
+
+        const delay_msb: u16 = @intCast(args[1]);
+        const delay_lsb: u16 = @intCast(args[2]);
+
+        return servo_angle_args{
+            .angle = args[0],
+            .delay_ms = (delay_msb << 8) | delay_lsb,
+        };
+    }
+};
+
 pub const Command = enum(u8) {
     //Echo = 100,
     Bootloader = 125,
     Led_Control = 101,
-    Servo_Control = 102,
+    Echo = 103,
+    Servo_Control = servo_angle_args.id,
 };
 
 pub const Feeder = struct {
     led: Pwm(4, .b),
     servo: Pwm(3, .a),
     next_move_time: u64,
-    speed: u16 = 100,
+    is_ready: bool,
+    speed: u16 = 20,
     servo_angle: u16 = 70,
     buf: [64]u8 = undefined,
 
-    pub fn run_cmd(self: *Feeder, cmd: Command, args: []const u8) !void {
-        switch (cmd) {
-            .Bootloader => return self.cmd_bootloader(),
-            .Led_Control => return self.cmd_set_led_level(args),
-            .Servo_Control => return self.cmd_set_servo_angle(args),
+    pub fn run_cmd(self: *Feeder, cmd: Command, args: []const u8) ![]const u8 {
+        var response: []const u8 = undefined;
+        // Exit early if there is already a cmd running
+        if (!self.is_ready) {
+            std.log.info("Trying to send a cmd before its ready again", .{});
+            return response;
         }
+
+        self.is_ready = false;
+        switch (cmd) {
+            .Bootloader => try self.cmd_bootloader(),
+            .Led_Control => try self.cmd_set_led_level(args),
+            .Servo_Control => try self.cmd_set_servo_angle(args),
+            .Echo => response = try self.cmd_echo(args),
+        }
+        return response;
     }
 
-    //fn cmd_echo_msg(self: @This(), args: []const u8) !void {
-    //    std.log.info("Echoing the data {any}", .{args});
-    //    const text = try std.fmt.bufPrint(&self.buf, "cdc test: {s}", .{args});
-    //    setup.driver_cdc.write(text);
-    //}
+    pub fn cmd_echo(_: *Feeder, args: []const u8) ![]const u8 {
+        return args;
+    }
+
+    pub fn cmd_complete(self: *Feeder, response: []const u8) !void {
+        setup.driver_cdc.write(response);
+        std.log.info("Command complete {any}", .{response});
+        self.is_ready = true;
+    }
 
     fn cmd_set_servo_angle(self: *Feeder, args: []const u8) !void {
         const now = time.get_time_since_boot().to_us();
-        const params = try parse_servo_args(args);
+        const params = try servo_angle_args.decode(args);
         std.log.info("Params: {any} {any}", .{ params, self.servo_angle });
-        try self.rotate_servo(params.angle, self.servo_angle, now, params.delay_ms);
+        try self.rotate_servo(@intCast(params.angle), self.servo_angle, now, @intCast(params.delay_ms));
     }
 
     fn cmd_set_led_level(self: *Feeder, args: []const u8) !void {
@@ -56,7 +92,7 @@ pub const Feeder = struct {
         }
     }
 
-    pub fn cmd_bootloader(_: *Feeder) void {
+    pub fn cmd_bootloader(_: *Feeder) !void {
         rp2040.rom.reset_usb_boot(0, 0);
     }
 
@@ -78,7 +114,7 @@ pub const Feeder = struct {
         pins.servo.slice().enable();
 
         // Assign to struct
-        const self = Feeder{ .led = pins.led, .servo = pins.servo, .next_move_time = now };
+        const self = Feeder{ .led = pins.led, .servo = pins.servo, .next_move_time = now, .is_ready = true };
 
         return self;
     }
@@ -98,8 +134,6 @@ pub const Feeder = struct {
         // Rotate the servo
         self.servo.set_level(result.level);
         self.servo_angle = angle;
-        //const text = try std.fmt.bufPrint(&self.buf, "Angle: {}\n", .{self.servo_angle});
-        //usb_config.driver_cdc.write(text);
 
         // Set the time at which it can move again (time is in microseconds)
         const sleep_time_micro_second: u64 = @intCast(result.sleep_ms);
@@ -154,39 +188,14 @@ fn get_level_and_sleep_time(previous_angle: u16, angle: u16, speed: u16) !struct
     };
 }
 
-test "reading in servo params" {
-    const args = [_]u8{ 10, 0x01, 0xFF };
-    const params = try parse_servo_args(args[0..]);
+test "deserialize byte slice into packed struct" {
+    // Example byte slice that we want to deserialize
+    const bytes = [_]u8{ 0x03, 0x01, 0x00 }; // Represents { .a = 3, .b = 258 }
 
-    // Reads in the angle correctly
-    try std.testing.expectEqual(10, params.angle);
+    const dataAsStruct = std.mem.bytesToValue(servo_angle_args, &bytes);
 
-    // Reads a u16 delay correctly
-    try std.testing.expectEqual(511, params.delay_ms);
-}
-
-test "serialize struct to bytes and print" {
-    const MyStruct = packed struct {
-        a: u8,
-        b: u16,
-    };
-
-    var my_struct = MyStruct{
-        .a = 128,
-        .b = 512,
-    };
-
-    // Cast the struct's pointer to a byte pointer
-    var bytes_ptr: [*]u8 = @ptrCast(&my_struct);
-
-    // Create a byte slice over the struct's memory
-    const bytes = bytes_ptr[0..@sizeOf(MyStruct)];
-
-    // Print the bytes in hexadecimal format
-    std.debug.print("Bytes: {any}", .{bytes_ptr});
-    for (bytes) |byte| {
-        std.debug.print("{x} ", .{byte});
-    }
+    try std.testing.expectEqual(3, dataAsStruct.angle);
+    try std.testing.expectEqual(258, dataAsStruct.delay_ms);
 }
 
 test "get level and sleep time" {

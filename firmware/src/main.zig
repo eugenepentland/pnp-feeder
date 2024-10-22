@@ -34,15 +34,24 @@ pub fn main() !void {
     setup.rp2040.usb.Usb.init_device(&setup.DEVICE_CONFIGURATION) catch unreachable;
 
     var data_buffer: [64]u8 = undefined;
+    var response: []const u8 = &[_]u8{};
+    var delay = now + 100000;
 
     while (true) {
+        if (response.len != 0) {
+            try feeder.cmd_complete(response);
+            response = &[_]u8{};
+        }
+
         // Get the current time
         now = setup.time.get_time_since_boot().to_us();
 
         // You can now poll for USB events
-        const bytes_recieved = setup.rp2040.usb.Usb.task(false, &data_buffer) catch unreachable;
+        var bytes_recieved: usize = 0;
+        bytes_recieved = setup.rp2040.usb.Usb.task(false, &data_buffer) catch unreachable;
 
         if (bytes_recieved > 0) {
+            std.log.info("recieved some data", .{});
             const data = data_buffer[0..bytes_recieved];
 
             // Validate the data and get the address/function id
@@ -53,10 +62,15 @@ pub fn main() !void {
 
             // Run the command
             const cmdEnum: Feeder.Command = @enumFromInt(packet.function);
-            feeder.run_cmd(cmdEnum, packet.args) catch |err| {
+            response = feeder.run_cmd(cmdEnum, packet.args) catch |err| {
                 std.log.err("Error running {any} {any}", .{ cmdEnum, err });
                 continue;
             };
+        }
+
+        if (delay < now) {
+            setup.driver_cdc.write("1000");
+            delay += 100000;
         }
     }
 }

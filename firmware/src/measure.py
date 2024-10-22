@@ -7,7 +7,18 @@ import re
 # Parameters
 captures_folder = 'captures'
 hole_diameter_mm = 1.5
-manual_reference_coordinates = (315, 162)  # Example manual coordinates (x, y)
+
+# Load reference coordinates from file
+reference_coordinates_file = "circle_coordinates.txt"
+try:
+    with open(reference_coordinates_file, "r") as file:
+        line = file.readline().strip()
+        reference_x, reference_y, _ = map(int, line.split())
+        manual_reference_coordinates = (reference_x, reference_y)
+except FileNotFoundError:
+    print(f"Error: {reference_coordinates_file} not found.")
+    exit()
+
 reference_circle_radius = 50  # Radius for masking the search area
 
 # Helper function to find circles
@@ -100,7 +111,7 @@ for angle_folder in sorted(os.listdir(captures_folder)):
             distance_pixels = np.sqrt((np.int64(x) - np.int64(reference_x)) ** 2 + (np.int64(y) - np.int64(reference_y)) ** 2)
             distance_mm = (distance_pixels / hole_diameter_pixels) * hole_diameter_mm
             distances.append(distance_mm)
-            capture_number = int(re.findall(r'\d+', image_file)[0])
+            capture_number = int(re.findall(r'\\d+', image_file)[0])
             capture_numbers.append(capture_number)
 
         # Plot results
