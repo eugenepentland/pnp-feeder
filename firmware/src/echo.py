@@ -29,7 +29,7 @@ def generate_crc16_append(data: list) -> list:
 
 # Set up the serial connection
 ser = serial.Serial(
-    port='COM9',  # Replace with your serial port
+    port='/dev/ttyACM0',  # Replace with your serial port
     baudrate=115200,
     parity=serial.PARITY_NONE,  # None parity
     stopbits=serial.STOPBITS_ONE,
@@ -67,6 +67,7 @@ while True:
     # Calculate the time difference using a high-precision timer
     execution_time = time.perf_counter() - start_time
     print(f"Execution time: {execution_time:.10f} seconds. {bytes}")
+    time.sleep(0.5)
     
 
 ser.close()

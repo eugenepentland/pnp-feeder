@@ -35,7 +35,6 @@ pub fn main() !void {
 
     var data_buffer: [64]u8 = undefined;
     var response: []const u8 = &[_]u8{};
-    var delay = now + 100000;
 
     while (true) {
         if (response.len != 0) {
@@ -66,11 +65,6 @@ pub fn main() !void {
                 std.log.err("Error running {any} {any}", .{ cmdEnum, err });
                 continue;
             };
-        }
-
-        if (delay < now) {
-            setup.driver_cdc.write("1000");
-            delay += 100000;
         }
     }
 }

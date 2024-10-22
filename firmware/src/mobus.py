@@ -38,7 +38,7 @@ def generate_crc16_append(data: list) -> list:
 
 # Set up the serial connection
 ser = serial.Serial(
-    port='COM9',  # Replace with your serial port
+    port='/dev/ttyACM0',  # Replace with your serial port
     baudrate=115200,
     parity=serial.PARITY_NONE,  # None parity
     stopbits=serial.STOPBITS_ONE,

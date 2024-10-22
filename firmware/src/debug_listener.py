@@ -1,7 +1,7 @@
 import serial
 
 # Open the serial port
-ser = serial.Serial('COM7', 115200, timeout=1)  # Change COM3 to your correct port
+ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)  # Change COM3 to your correct port
 print("serial interface conncted")
 # Send data
 #ser.write(b'Hello, UART\n')

@@ -1,4 +1,4 @@
-[submodule "library/microzig"]
+[submodule "firmware/library/microzig"]
 	path = firmware/library/microzig
 	url = https://github.com/eugenepentland/microzig.git
 	branch = dev
