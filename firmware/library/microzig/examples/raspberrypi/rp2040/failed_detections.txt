@@ -1,8 +1,0 @@
-captures/angle_70\capture_10.jpg
-captures/angle_70\capture_13.jpg
-captures/angle_70\capture_18.jpg
-captures/angle_70\capture_32.jpg
-captures/angle_70\capture_54.jpg
-captures/angle_70\capture_62.jpg
-captures/angle_70\capture_67.jpg
-captures/angle_70\capture_7.jpg
