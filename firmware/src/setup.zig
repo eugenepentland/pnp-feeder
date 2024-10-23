@@ -24,7 +24,7 @@ var usb_config_descriptor =
     usb.Endpoint.to_address(2, .Out), // Data OUT Endpoint
     usb.Endpoint.to_address(2, .In), // Data IN Endpoint
     64,
-);
+) ++ usb.templates.vendor_descriptor(1, 5, usb.Endpoint.to_address(3, .Out), usb.Endpoint.to_address(3, .In), 64);
 
 pub var driver_cdc = usb.cdc.CdcClassDriver{};
 pub var drivers = [_]usb.types.UsbClassDriver{driver_cdc.driver()};

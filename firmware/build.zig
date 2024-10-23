@@ -26,7 +26,7 @@ pub fn build(b: *std.Build) void {
 
         const exe = b.addExecutable(.{
             .name = "RunBootloader",
-            .root_source_file = b.path("src/tools/serial.zig"),
+            .root_source_file = b.path("src/tools/flash.zig"),
             .target = target,
             .optimize = optimize,
         });

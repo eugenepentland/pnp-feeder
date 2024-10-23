@@ -2,7 +2,7 @@ const std = @import("std");
 const zig_serial = @import("serial");
 
 pub fn main() !u8 {
-    const port_name = if (@import("builtin").os.tag == .windows) "\\\\.\\COM7" else "/dev/ttyUSB0";
+    const port_name = if (@import("builtin").os.tag == .windows) "\\\\.\\COM7" else "/dev/ttyACM0";
 
     var serial = std.fs.cwd().openFile(port_name, .{ .mode = .read_write }) catch |err| switch (err) {
         error.FileNotFound => {
@@ -22,8 +22,8 @@ pub fn main() !u8 {
     });
 
     std.log.info("starting loop", .{});
-    var buffer: [128]u8 = undefined;
-    var line: [128]u8 = undefined;
+    var buffer: [256]u8 = undefined;
+    var line: [256]u8 = undefined;
     var index: usize = 0;
 
     while (true) {

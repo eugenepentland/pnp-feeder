@@ -29,7 +29,7 @@ def generate_crc16_append(data: list) -> list:
 
 # Set up the serial connection
 ser = serial.Serial(
-    port='/dev/ttyACM0',  # Replace with your serial port
+    port='/dev/ttyACM1',  # Replace with your serial port
     baudrate=115200,
     parity=serial.PARITY_NONE,  # None parity
     stopbits=serial.STOPBITS_ONE,
@@ -43,7 +43,7 @@ if not ser.is_open:
 
 def echo_response(content):
     address = 0
-    function_id = 103
+    function_id = 125
     data = [address, function_id] + list(content)  # Example data
     return bytearray(generate_crc16_append(data))
 
@@ -52,17 +52,19 @@ import time
 
 while True:
     #i = input("Type what you want to send: ")
-    i = "hello"
+    i = "h"
     input_bytes = i.encode('utf-8')
-    data_bytes = echo_response(input_bytes)
+    data_bytes = echo_response([0])
     
 
     # Start timing using a high-precision timer
     start_time = time.perf_counter()
     
     ser.write(data_bytes)
+    print(data_bytes)
     # Await a response
-    bytes = ser.read(len(input_bytes))
+    #bytes = ser.read(len(input_bytes))
+    #print(bytes)
     
     # Calculate the time difference using a high-precision timer
     execution_time = time.perf_counter() - start_time

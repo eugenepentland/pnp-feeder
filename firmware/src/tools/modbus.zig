@@ -61,22 +61,22 @@ pub fn generate_crc16(data: []const u8) u16 {
     return crc;
 }
 
-pub fn update_crc_in_place(data: []u8) !void {
-    const len = data.len;
-    if (len < 2) {
-        return error.InvalidInput;
-    }
+pub fn append_crc_to_data(data: []u8, crc: u16) void {
+    const crc_low: u8 = @intCast(crc & 0xFF);
+    const crc_high: u8 = @intCast((crc >> 8) & 0xFF);
 
-    // Calculate the CRC16 of the data excluding the last two bytes
-    const crc = generate_crc16(data[0 .. len - 2]);
+    data[data.len - 1] = crc_low; // Update second-to-last byte with low byte of CRC
+    data[data.len - 2] = crc_high; // Update last byte with high byte of CRC
+}
 
-    // Split the CRC into high and low bytes
-    const high_byte: u8 = @intCast(crc >> 8);
-    const low_byte: u8 = @intCast(crc & 0xFF);
+test "Update crc in place" {
+    const expect: []const u8 = &[_]u8{ 0, 125, 0, 144, 80 };
+    var data = [_]u8{ 0, 125, 0, 0, 0 };
 
-    // Update the last two bytes with the CRC high and low bytes
-    data[len - 2] = high_byte;
-    data[len - 1] = low_byte;
+    const crc = generate_crc16(data[0 .. data.len - 2]);
+    append_crc_to_data(data[0..], crc);
+    
+    try std.testing.expect(std.mem.eql(u8, data[0..], expect));
 }
 
 test "validate data" {
