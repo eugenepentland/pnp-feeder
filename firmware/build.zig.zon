@@ -26,6 +26,9 @@
         .@"microzig/build" = .{
             .path = "lib/microzig/build",
         },
+        .modbus = .{
+            .path = "lib/modbus",
+        },
         .@"microzig/port/raspberrypi/rp2xxx" = .{
             .path = "lib/microzig/port/raspberrypi/rp2xxx",
         },

@@ -1,0 +1,9 @@
+.{
+    .name = "modbus",
+    .version = "0.0.1",
+    .paths = .{
+        "src", // all files in src directory
+        "build.zig",
+        "build.zig.zon",
+    },
+}

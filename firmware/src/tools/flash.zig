@@ -1,6 +1,6 @@
 const std = @import("std");
 const zig_serial = @import("serial");
-const modbus = @import("modbus.zig");
+const modbus = @import("modbus");
 
 pub fn set_usb_boot(port_name: []const u8) !void {
     var serial = try openDevice(port_name);

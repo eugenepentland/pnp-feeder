@@ -1,6 +1,6 @@
 const std = @import("std");
 const microzig = @import("microzig");
-const modbus = @import("modbus.zig");
+const modbus = @import("modbus");
 const setup = @import("setup.zig");
 const Feeder = @import("feeder.zig");
 
@@ -28,46 +28,25 @@ pub fn main() !void {
     setup.rp2040.usb.Usb.init_clk();
     setup.rp2040.usb.Usb.init_device(&setup.DEVICE_CONFIGURATION) catch unreachable;
 
-    var response: []const u8 = &[_]u8{};
-    var buf: [64]u8 = undefined;
-    var i: u32 = 0;
-    var before: u64 = 0;
-    var rx_array: [64]u8 = undefined;
-    const rx_buffer = rx_array[0..];
+    var rx_buffer: [64]u8 = undefined;
 
     std.log.info("Starting the loop", .{});
     while (true) {
         now = setup.time.get_time_since_boot().to_us();
 
         // You can now poll for USB events
-        const bytes_received = setup.rp2040.usb.Usb.task(true, rx_buffer) catch unreachable;
-        if (response.len != 0) {
-            try feeder.cmd_complete(response);
-            response = &[_]u8{};
-        }
-
-        if (now - before > 5000000000) {
-            before = now;
-            i += 1;
-            //    // uart log
-            std.log.info("cdc test: {}\r\n", .{i});
-            // usb log (at this moment 63 bytes is max limit per single call)
-            const text = std.fmt.bufPrint(&buf, "cdc test: {}\r\n", .{i}) catch &.{};
-            setup.driver_cdc.write(text);
-        }
+        const bytes_received = setup.rp2040.usb.Usb.task(false, rx_buffer[0..]) catch unreachable;
 
         if (bytes_received > 0) {
-            const data = rx_buffer[0..bytes_received];
-
             // Validate the data and get the address/function id
-            const packet = modbus.validate_data(data) catch |err| {
+            const packet = modbus.validate_crc(rx_buffer[0..bytes_received]) catch |err| {
                 std.log.err("error getting the packet, {any}", .{err});
                 continue;
             };
 
             // Run the command
             const cmdEnum: Feeder.Command = @enumFromInt(packet.function);
-            response = feeder.run_cmd(cmdEnum, packet.args) catch |err| {
+            feeder.run_cmd(cmdEnum, packet.args) catch |err| {
                 std.log.err("Error running {any} {any}", .{ cmdEnum, err });
                 continue;
             };

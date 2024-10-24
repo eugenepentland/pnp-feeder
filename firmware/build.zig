@@ -8,7 +8,7 @@ const available_examples = [_]Example{
 
 pub fn build(b: *std.Build) void {
     const mz = MicroZig.init(b, .{});
-    const optimize = b.standardOptimizeOption(.{});
+    const optimize = b.standardOptimizeOption(.{ .preferred_optimize_mode = .Debug });
     const target = b.standardTargetOptions(.{});
 
     for (available_examples) |example| {
@@ -27,6 +27,9 @@ fn build_firmware(b: *std.Build, mz: *MicroZig, example: Example, optimize: std.
         .root_source_file = b.path(example.file),
     });
 
+    const modbus = b.dependency("modbus", .{});
+    firmware.add_app_import("modbus", modbus.module("modbus"), .{});
+
     mz.install_firmware(b, firmware, .{});
 }
 
@@ -41,6 +44,9 @@ fn build_flash_firmware(b: *std.Build, optimize: std.builtin.OptimizeMode, targe
 
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
+
+    const modbus = b.dependency("modbus", .{});
+    exe.root_module.addImport("modbus", modbus.module("modbus"));
 
     const serial = b.dependency("serial", .{});
     exe.root_module.addImport("serial", serial.module("serial"));
@@ -60,6 +66,9 @@ fn build_echo_app(b: *std.Build, optimize: std.builtin.OptimizeMode, target: std
 
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
+
+    const modbus = b.dependency("modbus", .{});
+    exe.root_module.addImport("modbus", modbus.module("modbus"));
 
     const serial = b.dependency("serial", .{});
     exe.root_module.addImport("serial", serial.module("serial"));

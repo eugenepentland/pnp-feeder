@@ -1,6 +1,6 @@
 const std = @import("std");
 const zig_serial = @import("serial");
-const modbus = @import("modbus.zig");
+const modbus = @import("modbus");
 pub fn main() !void {
     const port_name = if (@import("builtin").os.tag == .windows) "\\\\.\\COM1" else "/dev/ttyACM1";
 
@@ -25,11 +25,14 @@ pub fn main() !void {
         try modbus.append_crc_to_data(slice);
 
         // Send the data
+        const start_time = std.time.nanoTimestamp();
         _ = try serial.writer().writeAll(slice);
 
         // Read the response
         const bytes_read = try serial.reader().readAll(buf[0..4]);
-        std.log.info("Response: {any}", .{buf[0..bytes_read]});
-        std.time.sleep(std.time.ns_per_ms * 200);
+        const end_time = std.time.nanoTimestamp();
+
+        std.log.info("Response: {any} in {any} nanoseconds", .{ buf[0..bytes_read], end_time - start_time });
+        //std.time.sleep(std.time.ns_per_ms * 2);
     }
 }

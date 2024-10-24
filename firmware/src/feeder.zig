@@ -1,6 +1,5 @@
 const std = @import("std");
 const microzig = @import("microzig");
-const usb_config = @import("usb_config.zig");
 const setup = @import("setup.zig");
 const rp2040 = microzig.hal;
 const time = rp2040.time;
@@ -44,12 +43,10 @@ pub const Feeder = struct {
     servo_angle: u16 = 70,
     buf: [64]u8 = undefined,
 
-    pub fn run_cmd(self: *Feeder, cmd: Command, args: []const u8) ![]const u8 {
-        var response: []const u8 = undefined;
+    pub fn run_cmd(self: *Feeder, cmd: Command, args: []const u8) !void {
         // Exit early if there is already a cmd running
         if (!self.is_ready) {
             std.log.info("Trying to send a cmd before its ready again", .{});
-            return response;
         }
 
         self.is_ready = false;
@@ -57,13 +54,12 @@ pub const Feeder = struct {
             .Bootloader => try self.cmd_bootloader(),
             .Led_Control => try self.cmd_set_led_level(args),
             .Servo_Control => try self.cmd_set_servo_angle(args),
-            .Echo => response = try self.cmd_echo(args),
+            .Echo => try self.cmd_echo(args),
         }
-        return response;
     }
 
-    pub fn cmd_echo(_: *Feeder, args: []const u8) ![]const u8 {
-        return args;
+    pub fn cmd_echo(self: *Feeder, args: []const u8) !void {
+        try self.cmd_complete(args);
     }
 
     pub fn cmd_complete(self: *Feeder, response: []const u8) !void {
