@@ -6,11 +6,7 @@ pub const Packet = struct {
     args: []const u8,
 };
 
-const MyError = error{
-    InvalidInput,
-    CorruptData,
-    InvalidLength,
-};
+const MyError = error{ InvalidInput, CorruptData, InvalidLength, MissingCRCBytes };
 
 pub fn validate_data(data: []const u8) !Packet {
     if (data.len < 4) {
@@ -61,7 +57,13 @@ pub fn generate_crc16(data: []const u8) u16 {
     return crc;
 }
 
-pub fn append_crc_to_data(data: []u8, crc: u16) void {
+pub fn append_crc_to_data(data: []u8) !void {
+    // Make sure the last two bytes are empty for the CDC
+    if (!(data[data.len - 1] == 0) and !(data[data.len - 2] == 0)) {
+        return error.MissingCRCBytes;
+    }
+
+    const crc = generate_crc16(data[0 .. data.len - 2]);
     const crc_low: u8 = @intCast(crc & 0xFF);
     const crc_high: u8 = @intCast((crc >> 8) & 0xFF);
 
@@ -73,9 +75,8 @@ test "Update crc in place" {
     const expect: []const u8 = &[_]u8{ 0, 125, 0, 144, 80 };
     var data = [_]u8{ 0, 125, 0, 0, 0 };
 
-    const crc = generate_crc16(data[0 .. data.len - 2]);
-    append_crc_to_data(data[0..], crc);
-    
+    try append_crc_to_data(data[0..]);
+
     try std.testing.expect(std.mem.eql(u8, data[0..], expect));
 }
 

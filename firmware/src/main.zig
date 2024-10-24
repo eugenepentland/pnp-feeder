@@ -40,13 +40,13 @@ pub fn main() !void {
         now = setup.time.get_time_since_boot().to_us();
 
         // You can now poll for USB events
-        const bytes_received = setup.rp2040.usb.Usb.task(false, rx_buffer) catch unreachable;
+        const bytes_received = setup.rp2040.usb.Usb.task(true, rx_buffer) catch unreachable;
         if (response.len != 0) {
             try feeder.cmd_complete(response);
             response = &[_]u8{};
         }
 
-        if (now - before > 500000) {
+        if (now - before > 5000000000) {
             before = now;
             i += 1;
             //    // uart log
@@ -58,7 +58,6 @@ pub fn main() !void {
 
         if (bytes_received > 0) {
             const data = rx_buffer[0..bytes_received];
-            std.log.info("recieved some data, {any}", .{data});
 
             // Validate the data and get the address/function id
             const packet = modbus.validate_data(data) catch |err| {
