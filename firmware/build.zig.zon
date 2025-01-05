@@ -23,14 +23,11 @@
     // Once all dependencies are fetched, `zig build` no longer requires
     // internet connectivity.
     .dependencies = .{
-        .@"microzig/build" = .{
-            .path = "lib/microzig/build",
+        .@"microzig" = .{
+            .path = "lib/microzig",
         },
         .modbus = .{
             .path = "lib/modbus",
-        },
-        .@"microzig/port/raspberrypi/rp2xxx" = .{
-            .path = "lib/microzig/port/raspberrypi/rp2xxx",
         },
         .serial = .{
             .url = "https://github.com/ZigEmbeddedGroup/serial/archive/13cc57bd170decc987660aa35a177c668c3e9cc5.tar.gz",

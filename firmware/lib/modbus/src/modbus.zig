@@ -3,12 +3,12 @@ const std = @import("std");
 pub const Packet = struct {
     address: u8,
     function: u8,
-    args: []const u8,
+    args: []u8,
 };
 
 const MyError = error{ InvalidInput, CorruptData, InvalidLength, MissingCRCBytes };
 
-pub fn validate_crc(data: []const u8) !Packet {
+pub fn validate_crc(data: []u8) !Packet {
     if (data.len < 4) {
         return MyError.InvalidLength;
     }

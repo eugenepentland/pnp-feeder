@@ -1,0 +1,71 @@
+{
+    "header": {
+      "message_id_type": "u8",
+      "fields": [
+        {
+          "name": "hardware_address",
+          "type": "u8",
+          "bytes": 1
+        }
+      ]
+    },
+    "messages": {
+      "0": {
+        "name": "rotate_servo",
+        "id": 0,
+        "description": "Hello world!",
+        "fields": [
+          {
+            "name": "angle",
+            "type": "u16",
+            "bytes": 2
+          }
+        ]
+      },
+      "1": {
+        "name": "set_led_in_array",
+        "id": 1,
+        "description": "Change the color of a single LED in the array",
+        "fields": [
+          {
+            "name": "led_index",
+            "type": "u8",
+            "bytes": 1
+          },
+          {
+            "name": "green",
+            "type": "u8",
+            "bytes": 1
+          },
+          {
+            "name": "red",
+            "type": "u8",
+            "bytes": 1
+          },
+          {
+            "name": "blue",
+            "type": "u8",
+            "bytes": 1
+          }
+        ]
+      },
+      "125": {
+        "name": "reset_usb_boot",
+        "id": 125,
+        "description": "Puts the rp2040 in usb bootloader mode.",
+        "fields": []
+      },
+      "126": {
+        "name": "echo_message",
+        "id": 126,
+        "description": "Responds back with the message that was sent over",
+        "fields": [
+          {
+            "name": "data",
+            "type": "u8",
+            "bytes": 1
+          }
+        ]
+      }
+    }
+  }
