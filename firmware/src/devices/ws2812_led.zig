@@ -7,7 +7,10 @@ const StateMachine = rp2xxx.pio.StateMachine;
 
 pub const LedStrip = @This();
 
-const num_leds: usize = 16;
+pub const num_leds: usize = 16;
+
+pub const Color = packed struct { r: u8, g: u8, b: u8 };
+
 pio: Pio,
 sm: StateMachine,
 pin: gpio.Pin,
@@ -85,6 +88,17 @@ pub fn init(
 
 // Function to set the color of a specific LED
 pub fn setLed(self: *LedStrip, index: usize, color: u32) void {
+    if (index < LedStrip.num_leds) {
+        if (self.led_states[index] == color) {
+            return;
+        }
+        self.led_states[index] = color;
+        self.updateLeds();
+    }
+}
+
+// Function to set the color of a specific LED
+pub fn setLedState(self: *LedStrip, index: usize, color: u32) void {
     if (index < LedStrip.num_leds) {
         self.led_states[index] = color;
     }

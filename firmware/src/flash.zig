@@ -140,7 +140,7 @@ pub fn write_firmware_to_device(port_name: []const u8, uf2_file_path: []const u8
 }
 
 pub fn main() !void {
-    const port_name = if (@import("builtin").os.tag == .windows) "\\\\.\\COM1" else "/dev/ttyACM1";
+    const port_name = if (@import("builtin").os.tag == .windows) "\\\\.\\COM1" else "/dev/ttyACM0";
     if (true) {
         const uf2_file_path = "zig-out/firmware/main.uf2";
 

@@ -66,6 +66,30 @@ pub const microzig_options = .{
     .logFn = rp2xxx.uart.logFn,
 };
 
+fn boot_sequence() void {
+    // Flash through the LED's on boot up
+    const led_count = f.feeder.led_strip.led_states.len;
+    for (0..led_count) |i| {
+
+        // Half power on the LED colors
+        const color: u32 = (32 << 16) | (32 << 8) | (32);
+
+        f.feeder.led_strip.setLed(i, color);
+
+        // Set the previous LED to be off
+        if (i > 0) {
+            f.feeder.led_strip.setLed(i - 1, 0);
+        }
+
+        // Set the LED state
+        f.feeder.led_strip.updateLeds();
+        time.sleep_ms(100);
+    }
+    // Turn off all of the LEDs
+    f.feeder.led_strip.setLed(led_count - 1, 0);
+    f.feeder.led_strip.updateLeds();
+}
+
 pub var response: []const u8 = undefined;
 var usb_tx_buff: [64]u8 = undefined;
 var usb_rx_buff: [64]u8 = undefined;
@@ -82,6 +106,7 @@ pub fn main() !void {
 
     rp2xxx.uart.init_logger(uart);
     std.log.info("Logging Started", .{});
+    var completed_boot_seq: bool = false;
 
     // First we initialize the USB clock
     usb_dev.init_clk();
@@ -99,6 +124,15 @@ pub fn main() !void {
 
         // read and print host command if present
         const rx_data = usb_cdc_read();
+
+        if (!completed_boot_seq) {
+            boot_sequence();
+            completed_boot_seq = true;
+        }
+
+        f.feeder.detect_feeder();
+        f.feeder.detect_button();
+
         if (rx_data.len > 0) {
             // Ignore message if not ready yet
             if (f.feeder.ready_time >= now) {
