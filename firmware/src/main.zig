@@ -2,6 +2,7 @@ const std = @import("std");
 const microzig = @import("microzig");
 const messages = @import("generated/commands.zig");
 const f = @import("feeder.zig");
+const Led = @import("devices/ws2812_led.zig");
 
 const rp2xxx = microzig.hal;
 const flash = rp2xxx.flash;
@@ -70,15 +71,15 @@ fn boot_sequence() void {
     // Flash through the LED's on boot up
     const led_count = f.feeder.led_strip.led_states.len;
     for (0..led_count) |i| {
-
-        // Half power on the LED colors
-        const color: u32 = (32 << 16) | (32 << 8) | (32);
-
-        f.feeder.led_strip.setLed(i, color);
+        f.feeder.led_strip.setLed(i, .{
+            .r = 8,
+            .g = 8,
+            .b = 9,
+        });
 
         // Set the previous LED to be off
         if (i > 0) {
-            f.feeder.led_strip.setLed(i - 1, 0);
+            f.feeder.led_strip.setLed(i - 1, .{ .r = 0, .g = 0, .b = 0 });
         }
 
         // Set the LED state
@@ -86,7 +87,7 @@ fn boot_sequence() void {
         time.sleep_ms(100);
     }
     // Turn off all of the LEDs
-    f.feeder.led_strip.setLed(led_count - 1, 0);
+    f.feeder.led_strip.setLed(led_count - 1, .{ .r = 0, .g = 0, .b = 0 });
     f.feeder.led_strip.updateLeds();
 }
 
@@ -172,9 +173,7 @@ inline fn handleMessage(message: messages.Message) void {
             rp2xxx.rom.reset_usb_boot(0, 0);
         },
         .set_led_in_array => |payload| {
-            const color: u32 = (@as(u32, payload.green) << 16) |
-                (@as(u32, payload.red) << 8) |
-                (@as(u32, payload.blue));
+            const color: Led.Color = .{ .r = payload.red, .g = payload.green, .b = payload.blue };
 
             f.feeder.led_strip.setLed(payload.led_index, color);
             f.feeder.led_strip.updateLeds();

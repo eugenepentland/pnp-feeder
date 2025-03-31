@@ -14,7 +14,7 @@ pub const Color = packed struct { r: u8, g: u8, b: u8 };
 pio: Pio,
 sm: StateMachine,
 pin: gpio.Pin,
-led_states: [num_leds]u32,
+led_states: [num_leds]Color,
 
 const ws2812_program = blk: {
     @setEvalBranchQuota(5000);
@@ -77,28 +77,25 @@ pub fn init(
         },
     });
     pio_instance.sm_set_enabled(sm_instance, true);
-
+    const default_color = Color{ .r = 0, .g = 0, .b = 0 };
     return LedStrip{
         .pio = pio_instance,
         .sm = sm_instance,
         .pin = led_pin_instance,
-        .led_states = [_]u32{0} ** LedStrip.num_leds,
+        .led_states = [_]Color{default_color} ** LedStrip.num_leds,
     };
 }
 
 // Function to set the color of a specific LED
-pub fn setLed(self: *LedStrip, index: usize, color: u32) void {
+pub fn setLed(self: *LedStrip, index: usize, color: Color) void {
     if (index < LedStrip.num_leds) {
-        if (self.led_states[index] == color) {
-            return;
-        }
         self.led_states[index] = color;
         self.updateLeds();
     }
 }
 
 // Function to set the color of a specific LED
-pub fn setLedState(self: *LedStrip, index: usize, color: u32) void {
+pub fn setLedState(self: *LedStrip, index: usize, color: Color) void {
     if (index < LedStrip.num_leds) {
         self.led_states[index] = color;
     }
@@ -107,6 +104,9 @@ pub fn setLedState(self: *LedStrip, index: usize, color: u32) void {
 // Function to send the current LED states to the LEDs
 pub fn updateLeds(self: *LedStrip) void {
     for (self.led_states) |color| {
-        self.pio.sm_blocking_write(self.sm, color << 8);
+        const u32_color: u32 = (@as(u32, color.r) << 24) |
+            (@as(u32, color.g) << 16) |
+            (@as(u32, color.b)) << 8;
+        self.pio.sm_blocking_write(self.sm, u32_color);
     }
 }

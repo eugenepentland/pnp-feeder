@@ -11,8 +11,8 @@ const Pwm = microzig.hal.pwm.Pwm;
 pub var feeder: Feeder = undefined;
 
 // --- Constants ---
-const ACTIVE_LED_COLOR: u32 = (8 << 16) | (8 << 8) | (8); // Dim white
-const INACTIVE_LED_COLOR: u32 = 0; // Off
+const ACTIVE_LED_COLOR: LedStrip.Color = .{ .r = 1, .g = 1, .b = 1 };
+const INACTIVE_LED_COLOR: LedStrip.Color = .{ .r = 0, .g = 0, .b = 0 };
 const CHANNEL_READ_DELAY_MS: u32 = 2; // Delay for MUX settling
 
 pub const SwitchState = enum(u3) {
